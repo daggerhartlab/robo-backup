@@ -21,7 +21,7 @@ class RoboFile extends \Robo\Tasks
       $this->getConfigVal('cli.version')
     );
 
-    $this->taskEnsureCli()->run($this->cli);
+    $this->taskEnsureCli($this->cli)->run();
   }
 
 }
