@@ -1,0 +1,20 @@
+{
+    "name": "daggerhartlab/robo-backups",
+    "type": "robo-tasks",
+    "authors": [
+        {
+            "name": "Jonathan Daggerhart",
+            "email": "jonathan@daggerhartlab.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "DagLab\\RoboBackups\\": "src/"
+        }
+    },
+    "require": {
+        "consolidation/robo": "^2",
+        "league/flysystem-aws-s3-v3": "^2.4",
+        "symfony/var-dumper": "^5.4"
+    }
+}

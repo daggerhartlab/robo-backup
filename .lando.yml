@@ -1,0 +1,17 @@
+name: robo-backup
+recipe: lamp
+config:
+  webroot: web
+
+tooling:
+  which:
+    service: appserver
+    cmd: which
+
+  robo:
+    service: appserver
+    cmd: robo
+
+  wp:
+    service: appserver
+    cmd: wp
