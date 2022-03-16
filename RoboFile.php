@@ -6,24 +6,22 @@
  */
 class RoboFile extends \Robo\Tasks
 {
+  use \DagLab\RoboBackups\loadTasks;
+  use \Kerasai\Robo\Config\ConfigHelperTrait;
+
+  /**
+   * @var \DagLab\RoboBackups\CliAdapter
+   */
   protected $cli;
 
   public function __construct() {
-    $this->cli = new \DagLab\RoboBackups\CliWp();
-  }
+    $this->cli = new \DagLab\RoboBackups\CliAdapter(
+      $this->getConfigVal('cli.executable'),
+      $this->getConfigVal('cli.package'),
+      $this->getConfigVal('cli.version')
+    );
 
-  public function ensureCli() {
-    $result = $this->taskExecStack()
-      ->stopOnFail(false)
-      ->exec("which {$this->cli->command()}")
-      ->run();
-
-    if ($result->getExitCode()) {
-      $this->taskExecStack()
-        ->stopOnFail()
-        ->exec("composer global require {$this->cli->package()}:{$this->cli->version()}")
-        ->run();
-    }
+    $this->taskEnsureCli()->run($this->cli);
   }
 
 }

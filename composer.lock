@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "faaba3237dd634ab54e1b837533452ab",
+    "content-hash": "b0006ef7a106b13adc9a4bc3f435de1f",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1014,6 +1014,47 @@
                 }
             ],
             "time": "2021-10-06T17:43:30+00:00"
+        },
+        {
+            "name": "kerasai/robo-config",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kerasai/robo-config.git",
+                "reference": "7693727d1d373d91ffdce74569993bc6d93e4d1b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kerasai/robo-config/zipball/7693727d1d373d91ffdce74569993bc6d93e4d1b",
+                "reference": "7693727d1d373d91ffdce74569993bc6d93e4d1b",
+                "shasum": ""
+            },
+            "require": {
+                "consolidation/robo": "~1 || ~2 || ~3"
+            },
+            "require-dev": {
+                "drupal/coder": "^8.3",
+                "phpunit/phpunit": "^6.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Kerasai\\Robo\\Config\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Will Long",
+                    "email": "will@kerasai.com"
+                }
+            ],
+            "description": "Configuration handling for Robo PHP task runner.",
+            "support": {
+                "issues": "https://github.com/kerasai/robo-config/issues",
+                "source": "https://github.com/kerasai/robo-config/tree/1.0.2"
+            },
+            "time": "2022-01-30T21:50:44+00:00"
         },
         {
             "name": "league/container",

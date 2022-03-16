@@ -4,6 +4,13 @@ namespace DagLab\RoboBackups;
 
 interface CliAdapterInterface
 {
+
+  /**
+   * @return string
+   *   Cli command.
+   */
+  public function executable();
+
   /**
    * @return string
    *   Composer package name.
@@ -15,11 +22,5 @@ interface CliAdapterInterface
    *   Package version.
    */
   public function version();
-
-  /**
-   * @return string
-   *   Cli command.
-   */
-  public function command();
 
 }
