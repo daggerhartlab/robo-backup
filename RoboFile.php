@@ -30,6 +30,7 @@ class RoboFile extends \Robo\Tasks
       $this->getConfigVal('cli.version')
     );
     $this->date = date('Y-m-d');
+    $this->stopOnFail();
   }
 
   public function backupDatabase() {
@@ -38,7 +39,7 @@ class RoboFile extends \Robo\Tasks
   }
 
   public function backupFiles() {
-    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-files.tgz";
+    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-files.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
     $this->taskPack($file)
       ->add($this->getConfigVal('backups.files_root'))
@@ -51,7 +52,7 @@ class RoboFile extends \Robo\Tasks
    * Backup the code and send to S3.
    */
   public function backupCode() {
-    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-code.tgz";
+    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-code.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
     $this->taskPack($file)
       ->add($this->getConfigVal('backups.code_root'))
