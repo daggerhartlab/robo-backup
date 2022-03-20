@@ -1,3 +1,11 @@
+.DS_Store
+*.zip
+*.tar
+*.tgz
+/.backups
 /vendor
 /web/*
 !/web/.gitkeep
+
+# Local config.
+robo.yml

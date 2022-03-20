@@ -38,6 +38,11 @@ class RoboFile extends \Robo\Tasks
 
   }
 
+  /**
+   * Backup non-code site files and send to S3.
+   *
+   * @throws \League\Flysystem\FilesystemException
+   */
   public function backupFiles() {
     $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-files.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
@@ -96,10 +101,11 @@ class RoboFile extends \Robo\Tasks
       'region' => $this->getConfigVal('aws.region'),
       'version' => $this->getConfigVal('aws.version'),
     ]);
-
-    $adapter = new AwsS3V3Adapter($client, $this->getConfigVal('aws.bucket'));
-    $filesystem = new Filesystem($adapter);
-    $filesystem->copy($source, $destination);
+    $client->putObject([
+      'Bucket' => $this->getConfigVal('aws.bucket'),
+      'SourceFile' => $source,
+      'Key' => $destination,
+    ]);
   }
 
 }

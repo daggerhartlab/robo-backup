@@ -14,7 +14,6 @@
     },
     "require": {
         "consolidation/robo": "^2",
-        "league/flysystem-aws-s3-v3": "^2.4",
         "symfony/var-dumper": "^5.4",
         "kerasai/robo-config": "^1.0",
         "pear/archive_tar": "^1.4"
