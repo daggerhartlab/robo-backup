@@ -66,7 +66,7 @@ class RoboFile extends \Robo\Tasks
 
     $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
-      ->addDir($this->getConfigVal('backups.files_root'), 'files')
+      ->addDir('files', $this->getConfigVal('backups.files_root'))
       ->run();
 
     $this->sendToS3($file, $filename);
@@ -81,7 +81,7 @@ class RoboFile extends \Robo\Tasks
 
     $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
-      ->addDir($this->getConfigVal('backups.code_root'), 'code')
+      ->addDir('code', $this->getConfigVal('backups.code_root'))
       ->exclude(rtrim($this->getConfigVal('backups.files_root'), '/') . '/*')
       ->run();
 
