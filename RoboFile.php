@@ -22,6 +22,17 @@ class RoboFile extends \Robo\Tasks
   protected $date;
 
   /**
+   * @var string[]
+   */
+  protected $archiveExclude = [
+    '*.zip',
+    '*.tar',
+    '*.tgz',
+    '*.tar.gz',
+    '*.wpress',
+  ];
+
+  /**
    * RoboFile constructor.
    */
   public function __construct() {
@@ -67,6 +78,7 @@ class RoboFile extends \Robo\Tasks
     $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
       ->addDir('files', $this->getConfigVal('backups.files_root'))
+      ->exclude($this->archiveExclude)
       ->run();
 
     $this->sendToS3($file, $filename);
@@ -82,7 +94,11 @@ class RoboFile extends \Robo\Tasks
     $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
       ->addDir('code', $this->getConfigVal('backups.code_root'))
-      ->exclude(rtrim($this->getConfigVal('backups.files_root'), '/') . '/*')
+      ->exclude(array_merge([
+        $this->archiveExclude,
+        // Exclude files from code backup.
+        [rtrim($this->getConfigVal('backups.files_root'), '/') . '/*'],
+      ]))
       ->run();
 
     $this->sendToS3($file, $filename);
