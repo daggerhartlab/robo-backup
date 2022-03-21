@@ -1,8 +1,6 @@
 <?php
 
 use Aws\S3\S3Client;
-use League\Flysystem\AwsS3V3\AwsS3V3Adapter;
-use League\Flysystem\Filesystem;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -23,6 +21,9 @@ class RoboFile extends \Robo\Tasks
    */
   protected $date;
 
+  /**
+   * RoboFile constructor.
+   */
   public function __construct() {
     $this->cli = new \DagLab\RoboBackups\CliAdapter(
       $this->getConfigVal('cli.executable'),
@@ -33,19 +34,30 @@ class RoboFile extends \Robo\Tasks
     $this->stopOnFail();
   }
 
+  /**
+   * Backup database and send to S3.
+   *
+   * @throws \Robo\Exception\TaskException
+   */
   public function backupDatabase() {
     $this->ensureCli();
 
+    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-db.sql.zip";
+    $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
+
+    $this->ensureDir($file);
+    // todo Backup db according to cli
+    // todo Send backup to S3.
   }
 
   /**
    * Backup non-code site files and send to S3.
-   *
-   * @throws \League\Flysystem\FilesystemException
    */
   public function backupFiles() {
     $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-files.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
+
+    $this->ensureDir($file);
     $this->taskPack($file)
       ->add($this->getConfigVal('backups.files_root'))
       ->run();
@@ -59,8 +71,10 @@ class RoboFile extends \Robo\Tasks
   public function backupCode() {
     $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-code.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
+
+    $this->ensureDir($file);
     $this->taskPack($file)
-      ->add($this->getConfigVal('backups.code_root'))
+      ->addDir('files', $this->getConfigVal('backups.code_root'))
       ->exclude($this->getConfigVal('backups.files_root'))
       ->run();
 
@@ -68,6 +82,8 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Install the cli if it doesn't exist.
+   *
    * @throws \Robo\Exception\TaskException
    */
   protected function ensureCli() {
@@ -85,12 +101,21 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Ensure a directory exists.
+   */
+  protected function ensureDir(string $filename) {
+    $this->taskFilesystemStack()
+      ->mkdir(realpath($filename))
+      ->run();
+  }
+
+  /**
    * Send file to S3.
    *
    * @param string $source
+   *   Local absolute filepath.
    * @param string $destination
-   *
-   * @throws \League\Flysystem\FilesystemException
+   *   Name of file in S3.
    */
   protected function sendToS3(string $source, string $destination) {
     $client = new S3Client([
