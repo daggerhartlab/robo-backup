@@ -147,6 +147,7 @@ class RoboFile extends \Robo\Tasks
    *   Name of file in S3.
    */
   protected function sendToS3(string $source, string $destination) {
+    // https://docs.aws.amazon.com/code-samples/latest/catalog/php-s3-CreateClient.php.html
     $client = new S3Client([
       'credentials' => [
         'key'    => $this->getConfigVal('aws.key'),
@@ -155,6 +156,7 @@ class RoboFile extends \Robo\Tasks
       'region' => $this->getConfigVal('aws.region'),
       'version' => $this->getConfigVal('aws.version'),
     ]);
+    // https://docs.aws.amazon.com/code-samples/latest/catalog/php-s3-PutObject.php.html
     $client->putObject([
       'Bucket' => $this->getConfigVal('aws.bucket'),
       'SourceFile' => $source,
