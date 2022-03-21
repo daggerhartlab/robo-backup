@@ -1,0 +1,29 @@
+name: Scheduled Backups
+
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onschedule
+on:
+  schedule:
+    # https://crontab.guru/examples.html
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # Change 'domain' to ssh hostname.
+          config: "Host domain\n  StrictHostKeyChecking no"
+          known_hosts: ' '
+
+      - name: Perform Backups
+        env:
+          connection: u91-euynd8zqnemc@daggerhartlab.com
+          port: 18765
+          robo_app_root: ~/.robo/app
+        run: |
+          ssh $connection -p $port "cd $robo_app_root && ./vendor/bin/robo backup:database"
+          ssh $connection -p $port "cd $robo_app_root && ./vendor/bin/robo backup:files"
+          ssh $connection -p $port "cd $robo_app_root && ./vendor/bin/robo backup:code"

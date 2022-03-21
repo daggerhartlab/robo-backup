@@ -26,7 +26,7 @@ Utility for handling backups for a self-hosted website.
 
 * Create S3 bucket and IAM user (see below).
 * Get this software on the server. Likely global install for the user.
-* Copy appropriate `robo.example-*.yml` file to `~/.robo/robo.yml`
+* Copy appropriate `examples/robo.example-*.yml` file to `~/.robo/robo.yml`
 * Complete configuration file w/ S3 details and paths to app, code, & files.
 * Github Actions setup (see below).
 

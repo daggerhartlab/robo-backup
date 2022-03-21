@@ -14,7 +14,7 @@ aws:
   region: 'us-east-2'
   version: 'latest'
 backups:
-  destination: '/home/some-user/.robo/backups'
   prefix: 'website-name'
+  destination: '/home/some-user/.robo/backups'
   files_root: '/home/some-user/public_html/wp-content/uploads'
   code_root: '/home/some-user/public_html'
