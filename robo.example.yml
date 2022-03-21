@@ -5,6 +5,7 @@ cli:
   executable: wp
   package: 'wp-cli/wp-cli-bundle'
   version: '*'
+  backup_db_command: 'db export [destination] --path=[app_root]'
 aws:
   bucket: ''
   key: ''

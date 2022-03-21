@@ -12,6 +12,7 @@ class CliAdapter implements CliAdapterInterface
   protected $executable;
   protected $package;
   protected $version;
+  protected $backupDbCommand;
 
   /**
    * CliAdapter constructor.
@@ -19,11 +20,13 @@ class CliAdapter implements CliAdapterInterface
    * @param string $executable
    * @param string $package
    * @param string $version
+   * @param string $backupDbCommand
    */
-  public function __construct(string $executable, string $package, string $version) {
+  public function __construct(string $executable, string $package, string $version, string $backupDbCommand) {
     $this->executable = $executable;
     $this->package = $package;
     $this->version = $version;
+    $this->backupDbCommand = $backupDbCommand;
   }
 
   /**
@@ -51,7 +54,10 @@ class CliAdapter implements CliAdapterInterface
    * @inheritDoc
    */
   public function backupDbCommand(string $app_root, string $destination) {
-    return "db export {$destination} --path={$app_root}";
+    return strtr($this->backupDbCommand, [
+      '[app_root]' => $app_root,
+      '[destination]' => $destination,
+    ]);
   }
 
 }

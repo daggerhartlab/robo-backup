@@ -28,7 +28,8 @@ class RoboFile extends \Robo\Tasks
     $this->cli = new \DagLab\RoboBackups\CliAdapter(
       $this->getConfigVal('cli.executable'),
       $this->getConfigVal('cli.package'),
-      $this->getConfigVal('cli.version')
+      $this->getConfigVal('cli.version'),
+      $this->getConfigVal('cli.backup_db_command')
     );
     $this->date = date('Y-m-d');
     $this->stopOnFail();
@@ -65,7 +66,7 @@ class RoboFile extends \Robo\Tasks
 
     $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
-      ->add($this->getConfigVal('backups.files_root'))
+      ->addDir($this->getConfigVal('backups.files_root'), 'files')
       ->run();
 
     $this->sendToS3($file, $filename);
@@ -80,8 +81,8 @@ class RoboFile extends \Robo\Tasks
 
     $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
-      ->addDir('files', $this->getConfigVal('backups.code_root'))
-      ->exclude($this->getConfigVal('backups.files_root'))
+      ->addDir($this->getConfigVal('backups.code_root'), 'code')
+      ->exclude(rtrim($this->getConfigVal('backups.files_root'), '/') . '/*')
       ->run();
 
     $this->sendToS3($file, $filename);
