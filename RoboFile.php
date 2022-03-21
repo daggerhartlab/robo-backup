@@ -50,7 +50,7 @@ class RoboFile extends \Robo\Tasks
       ->exec("{$this->cli->executable()} {$this->cli->backupDbCommand($this->getConfigVal('backups.code_root'), $file)}")
       ->run();
     $this->taskPack("{$file}.zip")
-      ->addFile($file, $filename)
+      ->addFile($filename, $file)
       ->run();
 
     $this->sendToS3("{$file}.zip", "{$filename}.zip");
