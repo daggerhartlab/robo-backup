@@ -57,7 +57,7 @@ class RoboFile extends \Robo\Tasks
     $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-files.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
 
-    $this->ensureDir($file);
+    $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
       ->add($this->getConfigVal('backups.files_root'))
       ->run();
@@ -72,7 +72,7 @@ class RoboFile extends \Robo\Tasks
     $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-code.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
 
-    $this->ensureDir($file);
+    $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
       ->addDir('files', $this->getConfigVal('backups.code_root'))
       ->exclude($this->getConfigVal('backups.files_root'))
@@ -103,9 +103,9 @@ class RoboFile extends \Robo\Tasks
   /**
    * Ensure a directory exists.
    */
-  protected function ensureDir(string $filename) {
+  protected function ensureDir(string $filepath) {
     $this->taskFilesystemStack()
-      ->mkdir(realpath($filename))
+      ->mkdir($filepath)
       ->run();
   }
 
