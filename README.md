@@ -2,10 +2,25 @@
 
 Utility for handling backups for a self-hosted website.
 
+## TODO
+
+- [ ] Delete local files after transfer to S3
+- [ ] Example github actions
+- [ ] Document how to setup from start to finish
+- [ ] Maybe a "verify" step after upload. Checksum style
+
 ## Requirements
 
 * S3 bucket w/ API credentials
 * Server access
+
+## Commands
+
+| Command | Description |
+|---|---|
+|`robo backup:database`| Backup website database according to robo.yml config. |
+|`robo backup:files`| Backup website non-code upload files. |
+|`robo backup:code`| Backup website code without upload files. |
 
 ## Setup
 
@@ -13,6 +28,7 @@ Utility for handling backups for a self-hosted website.
 * Get this software on the server. Likely global install for the user.
 * Copy appropriate `robo.example-*.yml` file to `~/.robo/robo.yml`
 * Complete configuration file w/ S3 details and paths to app, code, & files.
+* Github Actions setup (see below).
 
 ### S3 Setup
 
@@ -51,3 +67,7 @@ Utility for handling backups for a self-hosted website.
     ]
 }
 ```
+
+### Github Actions Setup
+
+@todo 
