@@ -12,24 +12,32 @@ class RoboFile extends \Robo\Tasks
   use \Kerasai\Robo\Config\ConfigHelperTrait;
 
   /**
+   * Configurable cli command.
+   *
    * @var \DagLab\RoboBackups\CliAdapter
    */
   protected $cli;
 
   /**
+   * Datestamp on the backups.
+   *
    * @var string
    */
   protected $date;
 
   /**
+   * Regex to exclude from archives.
+   *
+   * @link https://robo.li/tasks/Archive/
    * @var string[]
    */
   protected $archiveExclude = [
-    '*.zip',
-    '*.tar',
-    '*.tgz',
-    '*.tar.gz',
-    '*.wpress',
+    '.*.zip',
+    '.*.tar',
+    '.*.tgz',
+    '.*.tar.gz',
+    '.*.wpress',
+    '.*/node_modules/.*',
   ];
 
   /**
@@ -91,14 +99,12 @@ class RoboFile extends \Robo\Tasks
     $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-code.zip";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
 
+    // Exclude files from code backup.
+    $this->archiveExclude[] = rtrim($this->getConfigVal('backups.files_root'), '/') . '/*';
     $this->ensureDir($this->getConfigVal('backups.destination'));
     $this->taskPack($file)
       ->addDir('code', $this->getConfigVal('backups.code_root'))
-      ->exclude(array_merge([
-        $this->archiveExclude,
-        // Exclude files from code backup.
-        [rtrim($this->getConfigVal('backups.files_root'), '/') . '/*'],
-      ]))
+      ->exclude($this->archiveExclude)
       ->run();
 
     $this->sendToS3($file, $filename);

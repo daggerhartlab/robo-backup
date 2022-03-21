@@ -1,0 +1,20 @@
+#
+# Place this file in ~/.robo/robo.yml
+#
+cli:
+  executable: drush
+  package: 'drush/drush'
+  version: '10.*'
+  # https://www.drush.org/latest/commands/sql_dump/
+  backup_db_command: 'sql:dump --result-file=[destination] --root=[app_root]'
+aws:
+  bucket: ''
+  key: ''
+  secret: ''
+  region: 'us-east-2'
+  version: 'latest'
+backups:
+  destination: '/home/some-user/.robo/backups'
+  prefix: 'website-name'
+  files_root: '/home/some-user/public_html/sites/default/files'
+  code_root: '/home/some-user/public_html'
