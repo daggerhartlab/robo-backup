@@ -47,4 +47,11 @@ class CliAdapter implements CliAdapterInterface
     return $this->version;
   }
 
+  /**
+   * @inheritDoc
+   */
+  public function backupDbCommand(string $app_root, string $destination) {
+    return "db export {$destination} --path={$app_root}";
+  }
+
 }

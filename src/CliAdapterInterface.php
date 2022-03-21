@@ -23,4 +23,12 @@ interface CliAdapterInterface
    */
   public function version();
 
+  /**
+   * @param string $app_root
+   *   Location of the web app/website.
+   * @param string $destination
+   *   Backup destination folder.
+   */
+  public function backupDbCommand(string $app_root, string $destination);
+
 }

@@ -42,12 +42,18 @@ class RoboFile extends \Robo\Tasks
   public function backupDatabase() {
     $this->ensureCli();
 
-    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-db.sql.zip";
+    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-db.sql";
     $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
 
-    $this->ensureDir($file);
-    // todo Backup db according to cli
-    // todo Send backup to S3.
+    $this->ensureDir($this->getConfigVal('backups.destination'));
+    $this->taskExecStack()
+      ->exec("{$this->cli->executable()} {$this->cli->backupDbCommand($this->getConfigVal('backups.code_root'), $file)}")
+      ->run();
+    $this->taskPack("{$file}.zip")
+      ->addFile($file, $filename)
+      ->run();
+
+    $this->sendToS3("{$file}.zip", "{$filename}.zip");
   }
 
   /**
