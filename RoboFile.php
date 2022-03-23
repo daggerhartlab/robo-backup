@@ -50,7 +50,7 @@ class RoboFile extends \Robo\Tasks
       $this->getConfigVal('cli.version'),
       $this->getConfigVal('cli.backup_db_command')
     );
-    $this->date = date('Y-m-d');
+    $this->date = date('Y-m-d--G-i-s');
     $this->stopOnFail();
   }
 
@@ -74,6 +74,7 @@ class RoboFile extends \Robo\Tasks
       ->run();
 
     $this->sendToS3("{$file}.zip", "{$filename}.zip");
+    $this->removeFile("{$file}.zip");
   }
 
   /**
@@ -90,6 +91,7 @@ class RoboFile extends \Robo\Tasks
       ->run();
 
     $this->sendToS3($file, $filename);
+    $this->removeFile($file);
   }
 
   /**
@@ -108,6 +110,7 @@ class RoboFile extends \Robo\Tasks
       ->run();
 
     $this->sendToS3($file, $filename);
+    $this->removeFile($file);
   }
 
   /**
@@ -131,10 +134,23 @@ class RoboFile extends \Robo\Tasks
 
   /**
    * Ensure a directory exists.
+   *
+   * @param string $filepath
    */
   protected function ensureDir(string $filepath) {
     $this->taskFilesystemStack()
       ->mkdir($filepath)
+      ->run();
+  }
+
+  /**
+   * Remove given filename.
+   *
+   * @param string $filepath
+   */
+  protected function removeFile(string $filepath) {
+    $this->taskFilesystemStack()
+      ->remove($filepath)
       ->run();
   }
 
