@@ -51,7 +51,7 @@ class RoboFile extends \Robo\Tasks
       $this->requireConfigVal('cli.version'),
       $this->requireConfigVal('cli.backup_db_command')
     );
-    $this->date = date('Y-m-d--G-i-s');
+    $this->date = date('Y-m-d');
   }
 
   /**
