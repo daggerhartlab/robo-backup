@@ -86,6 +86,7 @@ class RoboFile extends \Robo\Tasks
       ->run();
 
     $this->sendToS3("{$file}.zip", "{$filename}.zip");
+    $this->removeFile($file);
     $this->removeFile("{$file}.zip");
   }
 
