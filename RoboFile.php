@@ -37,11 +37,11 @@ class RoboFile extends \Robo\Tasks
    * @var string[]
    */
   protected $archiveExclude = [
-    '.*.zip',
-    '.*.tar',
-    '.*.tgz',
-    '.*.tar.gz',
-    '.*.wpress',
+    '.*\.zip',
+    '.*\.tar',
+    '.*\.tgz',
+    '.*\.tar\.gz',
+    '.*\.wpress',
     '.*\/node_modules\/.*',
     '.*\/.git\/.*',
   ];
