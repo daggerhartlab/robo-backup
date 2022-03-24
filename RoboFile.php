@@ -132,11 +132,16 @@ class RoboFile extends \Robo\Tasks
     $filename = "{$this->requireConfigVal('backups.prefix')}-{$this->date}-code.zip";
     $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
 
+    $relative_files_root = str_replace(
+      $this->requireConfigVal('backups.code_root'),
+      '',
+      $this->requireConfigVal('backups.files_root')
+    );
     // Exclude files from code backup.
     $this->archiveExclude[] = str_replace(
       '/',
       '\/',
-      rtrim($this->requireConfigVal('backups.files_root'), '/') . '/.*'
+      trim($relative_files_root, '/')
     );
     $this->ensureDir($this->requireConfigVal('backups.destination'));
     $this->taskPack($file)
