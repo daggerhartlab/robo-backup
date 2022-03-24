@@ -42,8 +42,8 @@ class RoboFile extends \Robo\Tasks
     '.*.tgz',
     '.*.tar.gz',
     '.*.wpress',
-    '.*/node_modules/.*',
-    '.*/.git/.*',
+    '.*\/node_modules\/.*',
+    '.*\/.git\/.*',
   ];
 
   /**
@@ -133,7 +133,11 @@ class RoboFile extends \Robo\Tasks
     $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
 
     // Exclude files from code backup.
-    $this->archiveExclude[] = rtrim($this->requireConfigVal('backups.files_root'), '/') . '/*';
+    $this->archiveExclude[] = str_replace(
+      '/',
+      '\/',
+      rtrim($this->requireConfigVal('backups.files_root'), '/') . '/.*'
+    );
     $this->ensureDir($this->requireConfigVal('backups.destination'));
     $this->taskPack($file)
       ->addDir('code', $this->requireConfigVal('backups.code_root'))
