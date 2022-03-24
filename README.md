@@ -21,6 +21,7 @@ Utility for handling backups for a self-hosted website.
 |`robo backup:database`| Backup website database according to robo.yml config. |
 |`robo backup:files`| Backup website non-code upload files. |
 |`robo backup:code`| Backup website code without upload files. |
+|`robo backup:files-sync`| Sync the files_root to S3 into a virtual folder named `files_sync`. |
 
 ## Setup
 
@@ -32,9 +33,11 @@ Utility for handling backups for a self-hosted website.
 
 ### S3 Setup
 
-1. Create a new S3 bucket named `backups-[WEBSITE]`. 
-1. Create a new IAM user named `S3-backups-[WEBSITE]`. API access, does not need Login/Console access.
-1. Save the credentials to LastPass.
+1. Create a new S3 bucket named `backups-[WEBSITE]`.
+1. Create a new IAM user named `S3-backups-[WEBSITE]`. 
+    * Add to "S3-backups" group
+    * API access, does not need Login/Console access.
+1. Save the credentials to LastPass as part of the Note named "AWS S3 Client Backups Credentials"
 1. Attach a new Access Policy (see below) to the new IAM user.
 
 #### Access Policy

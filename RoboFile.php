@@ -38,6 +38,7 @@ class RoboFile extends \Robo\Tasks
     '.*.tar.gz',
     '.*.wpress',
     '.*/node_modules/.*',
+    '.*/.git/.*',
   ];
 
   /**
@@ -51,7 +52,6 @@ class RoboFile extends \Robo\Tasks
       $this->getConfigVal('cli.backup_db_command')
     );
     $this->date = date('Y-m-d--G-i-s');
-    $this->stopOnFail();
   }
 
   /**
@@ -95,6 +95,25 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Sync files to s3 bucket in case of large file systems.
+   *
+   * @link https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-envvars.html
+   * @link https://awscli.amazonaws.com/v2/documentation/api/latest/reference/s3/sync.html
+   */
+  public function backupFilesSync() {
+    $this->ensureAwsCli();
+    $this->taskExecStack()
+      ->stopOnFail()
+      ->envVars([
+        'AWS_ACCESS_KEY_ID' => $this->requireConfigVal('aws.key'),
+        'AWS_SECRET_ACCESS_KEY' => $this->requireConfigVal('aws.secret'),
+        'AWS_DEFAULT_REGION' => $this->requireConfigVal('aws.region'),
+      ])
+      ->exec("aws s3 sync {$this->requireConfigVal('backups.files_root')} s3://{$this->requireConfigVal('aws.bucket')}/files_sync")
+      ->run();
+  }
+
+  /**
    * Backup the code and send to S3.
    */
   public function backupCode() {
@@ -133,6 +152,30 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Ensure the aws cli is installed.
+   *
+   * @link https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html
+   *
+   * @throws \Robo\Exception\TaskException
+   */
+  public function ensureAwsCli() {
+    $result = $this->taskExecStack()
+      ->stopOnFail(false)
+      ->exec("which aws")
+      ->run();
+
+    if ($result->getExitCode()) {
+      $this->taskExecStack()
+        ->stopOnFail(true)
+        ->exec('curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"')
+        ->exec('unzip awscliv2.zip -o')
+        ->exec('./aws/install')
+        ->exec('rm -fr ./aws')
+        ->run();
+    }
+  }
+
+  /**
    * Ensure a directory exists.
    *
    * @param string $filepath
@@ -157,26 +200,37 @@ class RoboFile extends \Robo\Tasks
   /**
    * Send file to S3.
    *
+   * @link https://docs.aws.amazon.com/code-samples/latest/catalog/php-s3-PutObject.php.html
+   *
    * @param string $source
    *   Local absolute filepath.
    * @param string $destination
    *   Name of file in S3.
    */
   protected function sendToS3(string $source, string $destination) {
-    // https://docs.aws.amazon.com/code-samples/latest/catalog/php-s3-CreateClient.php.html
-    $client = new S3Client([
+    $client = $this->createS3Client();
+    $client->putObject([
+      'Bucket' => $this->getConfigVal('aws.bucket'),
+      'SourceFile' => $source,
+      'Key' => $destination,
+    ]);
+  }
+
+  /**
+   * Create instance of S3 client.
+   *
+   * @link https://docs.aws.amazon.com/code-samples/latest/catalog/php-s3-CreateClient.php.html
+   *
+   * @return \Aws\S3\S3Client
+   */
+  protected function createS3Client() {
+    return new S3Client([
       'credentials' => [
         'key'    => $this->getConfigVal('aws.key'),
         'secret' => $this->getConfigVal('aws.secret'),
       ],
       'region' => $this->getConfigVal('aws.region'),
       'version' => $this->getConfigVal('aws.version'),
-    ]);
-    // https://docs.aws.amazon.com/code-samples/latest/catalog/php-s3-PutObject.php.html
-    $client->putObject([
-      'Bucket' => $this->getConfigVal('aws.bucket'),
-      'SourceFile' => $source,
-      'Key' => $destination,
     ]);
   }
 
