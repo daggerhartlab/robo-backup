@@ -47,6 +47,20 @@ class RoboFile extends \Robo\Tasks
   ];
 
   /**
+   * Array of file folders.
+   *
+   * @var array
+   */
+  protected $backupFilesRoot = [];
+
+  /**
+   * Array of code folders.
+   *
+   * @var array
+   */
+  protected $backupCodeRoot = [];
+
+  /**
    * RoboFile constructor.
    */
   public function __construct() {
@@ -57,6 +71,9 @@ class RoboFile extends \Robo\Tasks
       $this->requireConfigVal('cli.backup_db_command')
     );
     $this->date = date('Y-m-d');
+
+    $this->backupFilesRoot = (array) $this->requireConfigVal('backups.files_root');
+    $this->backupCodeRoot = (array) $this->requireConfigVal('backups.code_root');
   }
 
   /**
@@ -96,10 +113,14 @@ class RoboFile extends \Robo\Tasks
   public function backupFiles() {
     $filename = "{$this->requireConfigVal('backups.prefix')}-{$this->date}-files.zip";
     $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
-
     $this->ensureDir($this->requireConfigVal('backups.destination'));
-    $this->taskPack($file)
-      ->addDir('files', $this->requireConfigVal('backups.files_root'))
+
+    $archive = $this->taskPack($file);
+    foreach ($this->backupFilesRoot as $i => $files_root) {
+      $folder = basename($files_root) . "_{$i}";
+      $archive->addDir($folder, $files_root);
+    }
+    $archive
       ->exclude($this->archiveExclude)
       ->run();
 
@@ -115,15 +136,19 @@ class RoboFile extends \Robo\Tasks
    */
   public function backupFilesSync() {
     $this->ensureAwsCli();
-    $this->taskExecStack()
+    $sync = $this->taskExecStack()
       ->stopOnFail()
       ->envVars([
         'AWS_ACCESS_KEY_ID' => $this->requireConfigVal('aws.key'),
         'AWS_SECRET_ACCESS_KEY' => $this->requireConfigVal('aws.secret'),
         'AWS_DEFAULT_REGION' => $this->requireConfigVal('aws.region'),
-      ])
-      ->exec("aws s3 sync {$this->requireConfigVal('backups.files_root')} s3://{$this->requireConfigVal('aws.bucket')}/files_sync")
-      ->run();
+      ]);
+
+    foreach ($this->backupFilesRoot as $i => $files_root) {
+      $folder = basename($files_root) . "_sync_{$i}";
+      $sync->exec("aws s3 sync {$files_root} s3://{$this->requireConfigVal('aws.bucket')}/{$folder}");
+    }
+    $sync->run();
   }
 
   /**
@@ -132,21 +157,20 @@ class RoboFile extends \Robo\Tasks
   public function backupCode() {
     $filename = "{$this->requireConfigVal('backups.prefix')}-{$this->date}-code.zip";
     $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
-
-    $relative_files_root = str_replace(
-      $this->requireConfigVal('backups.code_root'),
-      '',
-      $this->requireConfigVal('backups.files_root')
-    );
-    // Exclude files from code backup.
-    $this->archiveExclude[] = str_replace(
-      '/',
-      '\/',
-      trim($relative_files_root, '/')
-    );
     $this->ensureDir($this->requireConfigVal('backups.destination'));
-    $this->taskPack($file)
-      ->addDir('code', $this->requireConfigVal('backups.code_root'))
+
+    // Exclude files from code backup.
+    foreach ($this->backupFilesRoot as $files_root) {
+      foreach ($this->backupCodeRoot as $code_root) {
+        $relative_files_root = str_replace($code_root, '', $files_root);
+        $this->archiveExclude[] = str_replace('/', '\/', trim($relative_files_root, '/'));
+      }
+    }
+    $archive = $this->taskPack($file);
+    foreach ($this->backupCodeRoot as $i => $code_root) {
+      $archive->addDir("code_{$i}", $this->requireConfigVal('backups.code_root'));
+    }
+    $archive
       ->exclude($this->archiveExclude)
       ->run();
 
