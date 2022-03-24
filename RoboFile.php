@@ -46,10 +46,10 @@ class RoboFile extends \Robo\Tasks
    */
   public function __construct() {
     $this->cli = new \DagLab\RoboBackups\CliAdapter(
-      $this->getConfigVal('cli.executable'),
-      $this->getConfigVal('cli.package'),
-      $this->getConfigVal('cli.version'),
-      $this->getConfigVal('cli.backup_db_command')
+      $this->requireConfigVal('cli.executable'),
+      $this->requireConfigVal('cli.package'),
+      $this->requireConfigVal('cli.version'),
+      $this->requireConfigVal('cli.backup_db_command')
     );
     $this->date = date('Y-m-d--G-i-s');
   }
@@ -62,12 +62,12 @@ class RoboFile extends \Robo\Tasks
   public function backupDatabase() {
     $this->ensureCli();
 
-    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-db.sql";
-    $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
+    $filename = "{$this->requireConfigVal('backups.prefix')}-{$this->date}-db.sql";
+    $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
 
-    $this->ensureDir($this->getConfigVal('backups.destination'));
+    $this->ensureDir($this->requireConfigVal('backups.destination'));
     $this->taskExecStack()
-      ->exec("{$this->cli->executable()} {$this->cli->backupDbCommand($this->getConfigVal('backups.code_root'), $file)}")
+      ->exec("{$this->cli->executable()} {$this->cli->backupDbCommand($this->requireConfigVal('backups.code_root'), $file)}")
       ->run();
     $this->taskPack("{$file}.zip")
       ->addFile($filename, $file)
@@ -81,12 +81,12 @@ class RoboFile extends \Robo\Tasks
    * Backup non-code site files and send to S3.
    */
   public function backupFiles() {
-    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-files.zip";
-    $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
+    $filename = "{$this->requireConfigVal('backups.prefix')}-{$this->date}-files.zip";
+    $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
 
-    $this->ensureDir($this->getConfigVal('backups.destination'));
+    $this->ensureDir($this->requireConfigVal('backups.destination'));
     $this->taskPack($file)
-      ->addDir('files', $this->getConfigVal('backups.files_root'))
+      ->addDir('files', $this->requireConfigVal('backups.files_root'))
       ->exclude($this->archiveExclude)
       ->run();
 
@@ -117,14 +117,14 @@ class RoboFile extends \Robo\Tasks
    * Backup the code and send to S3.
    */
   public function backupCode() {
-    $filename = "{$this->getConfigVal('backups.prefix')}-{$this->date}-code.zip";
-    $file = "{$this->getConfigVal('backups.destination')}/{$filename}";
+    $filename = "{$this->requireConfigVal('backups.prefix')}-{$this->date}-code.zip";
+    $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
 
     // Exclude files from code backup.
-    $this->archiveExclude[] = rtrim($this->getConfigVal('backups.files_root'), '/') . '/*';
-    $this->ensureDir($this->getConfigVal('backups.destination'));
+    $this->archiveExclude[] = rtrim($this->requireConfigVal('backups.files_root'), '/') . '/*';
+    $this->ensureDir($this->requireConfigVal('backups.destination'));
     $this->taskPack($file)
-      ->addDir('code', $this->getConfigVal('backups.code_root'))
+      ->addDir('code', $this->requireConfigVal('backups.code_root'))
       ->exclude($this->archiveExclude)
       ->run();
 
@@ -210,7 +210,7 @@ class RoboFile extends \Robo\Tasks
   protected function sendToS3(string $source, string $destination) {
     $client = $this->createS3Client();
     $client->putObject([
-      'Bucket' => $this->getConfigVal('aws.bucket'),
+      'Bucket' => $this->requireConfigVal('aws.bucket'),
       'SourceFile' => $source,
       'Key' => $destination,
     ]);
@@ -226,11 +226,11 @@ class RoboFile extends \Robo\Tasks
   protected function createS3Client() {
     return new S3Client([
       'credentials' => [
-        'key'    => $this->getConfigVal('aws.key'),
-        'secret' => $this->getConfigVal('aws.secret'),
+        'key'    => $this->requireConfigVal('aws.key'),
+        'secret' => $this->requireConfigVal('aws.secret'),
       ],
-      'region' => $this->getConfigVal('aws.region'),
-      'version' => $this->getConfigVal('aws.version'),
+      'region' => $this->requireConfigVal('aws.region'),
+      'version' => $this->requireConfigVal('aws.version'),
     ]);
   }
 
