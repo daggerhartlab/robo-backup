@@ -12,6 +12,11 @@ class RoboFile extends \Robo\Tasks
   use \Kerasai\Robo\Config\ConfigHelperTrait;
 
   /**
+   * Version number.
+   */
+  const VERSION = '1.0.0';
+
+  /**
    * Configurable cli command.
    *
    * @var \DagLab\RoboBackups\CliAdapter
@@ -52,6 +57,13 @@ class RoboFile extends \Robo\Tasks
       $this->requireConfigVal('cli.backup_db_command')
     );
     $this->date = date('Y-m-d');
+  }
+
+  /**
+   * Show version number.
+   */
+  public function version() {
+    $this->writeln(static::VERSION);
   }
 
   /**

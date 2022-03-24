@@ -4,8 +4,6 @@ Utility for handling backups for a self-hosted website.
 
 ## TODO
 
-- [ ] Delete local files after transfer to S3
-- [ ] Example github actions
 - [ ] Document how to setup from start to finish
 - [ ] Maybe a "verify" step after upload. Checksum style
 
