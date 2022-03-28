@@ -214,7 +214,7 @@ class RoboFile extends \Robo\Tasks
       $this->taskExecStack()
         ->stopOnFail(true)
         ->exec('curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"')
-        ->exec('unzip awscliv2.zip -o')
+        ->exec('unzip awscliv2.zip')
         ->exec('./aws/install')
         ->exec('rm -fr ./aws')
         ->run();
