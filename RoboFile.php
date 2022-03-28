@@ -215,8 +215,9 @@ class RoboFile extends \Robo\Tasks
         ->stopOnFail(true)
         ->exec('curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"')
         ->exec('unzip awscliv2.zip')
-        ->exec('./aws/install')
+        ->exec('./aws/install -i ~/.local/aws-cli -b ~/.local/bin')
         ->exec('rm -fr ./aws')
+        ->exec("echo 'export PATH=\$PATH:\$HOME/.local/bin' >> .bashrc")
         ->run();
     }
   }
