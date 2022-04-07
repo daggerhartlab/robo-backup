@@ -136,6 +136,7 @@ class RoboFile extends \Robo\Tasks
    */
   public function backupFilesSync() {
     $this->ensureAwsCli();
+    $folder = trim($this->getConfigVal('aws.folder') ?? '', '/');
     $sync = $this->taskExecStack()
       ->stopOnFail()
       ->envVars([
@@ -145,8 +146,11 @@ class RoboFile extends \Robo\Tasks
       ]);
 
     foreach ($this->backupFilesRoot as $i => $files_root) {
-      $folder = basename($files_root) . "_sync_{$i}";
-      $sync->exec("aws s3 sync {$files_root} s3://{$this->requireConfigVal('aws.bucket')}/{$folder}");
+      $destination = basename($files_root) . "_sync_{$i}";
+      if ($folder) {
+        $destination = "{$folder}/{$destination}";
+      }
+      $sync->exec("aws s3 sync {$files_root} s3://{$this->requireConfigVal('aws.bucket')}/{$destination}");
     }
     $sync->run();
   }
