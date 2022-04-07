@@ -13,6 +13,7 @@ aws:
   secret: ''
   region: 'us-east-2'
   version: 'latest'
+  folder: ''
 backups:
   prefix: 'website-name'
   destination: '/home/some-user/.robo/backups'

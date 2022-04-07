@@ -14,7 +14,7 @@ class RoboFile extends \Robo\Tasks
   /**
    * Version number.
    */
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0';
 
   /**
    * Configurable cli command.
@@ -255,6 +255,11 @@ class RoboFile extends \Robo\Tasks
    *   Name of file in S3.
    */
   protected function sendToS3(string $source, string $destination) {
+    $folder = trim($this->getConfigVal('aws.folder') ?? '', '/');
+    if ($folder) {
+      $destination = "{$folder}/{$destination}";
+    }
+
     $client = $this->createS3Client();
     $client->putObject([
       'Bucket' => $this->requireConfigVal('aws.bucket'),
