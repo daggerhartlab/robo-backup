@@ -15,7 +15,7 @@ class RoboFile extends \Robo\Tasks
   /**
    * Version number.
    */
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
   /**
    * Configurable cli command.
