@@ -10,7 +10,7 @@ use Spatie\DbDumper\DbDumper;
  *
  * @package DagLab\RoboBackups
  */
-class DbDumperAdapter {
+class DbDumperAdapter implements DbDumperAdapterInterface {
 
   /**
    * Database type, named after the dump utility.
@@ -19,6 +19,16 @@ class DbDumperAdapter {
    * @var string
    */
   protected $dbType;
+
+  /**
+   * @var \DagLab\RoboBackups\DbDumperConfigInterface
+   */
+  protected $config;
+
+  /**
+   * @var \Spatie\DbDumper\DbDumper
+   */
+  protected $dumper;
 
   /**
    * @var string[]
@@ -34,33 +44,31 @@ class DbDumperAdapter {
    * DbDumperAdapter constructor.
    *
    * @param string $db_type
+   * @param \DagLab\RoboBackups\DbDumperConfigInterface|null $config
    */
-  public function __construct(string $db_type) {
+  public function __construct(string $db_type, DbDumperConfigInterface $config = NULL) {
     $this->dbType = $db_type;
+    $this->config = $config;
+    $this->dumper = $this->createDumper($this->dbType, $config);
   }
 
   /**
-   * @param string $db_type
-   *
-   * @return bool
+   * @inheritDoc
    */
   public function isAllowedType(string $db_type) {
     return in_array($db_type, array_keys($this->typeDriverMap));
   }
 
   /**
-   * @param string $db_type
-   * @param \DagLab\RoboBackups\DbDumperConfigInterface|null $config
-   *
-   * @return \Spatie\DbDumper\DbDumper
+   * @inheritDoc
    */
-  public function createDriver(string $db_type, DbDumperConfigInterface $config = NULL) {
+  public function createDumper(string $db_type, DbDumperConfigInterface $config = NULL) {
     if (!$this->isAllowedType($db_type)) {
       throw new \RuntimeException("Database type is now allowed: {$db_type}");
     }
 
     /** @var \Spatie\DbDumper\DbDumper $class */
-    $class = "Database\\{$this->typeDriverMap[$db_type]}";
+    $class = "\\Spatie\\DbDumper\\Databases\\{$this->typeDriverMap[$db_type]}";
     $db_dumper = $class::create();
     if ($config) {
       $db_dumper = $this->setDumperConfig($db_dumper, $config);
@@ -69,11 +77,7 @@ class DbDumperAdapter {
   }
 
   /**
-   * @param \Spatie\DbDumper\DbDumper $db_dumper
-   * @param \DagLab\RoboBackups\DbDumperConfigInterface $config
-   *
-   * @return \Spatie\DbDumper\DbDumper
-   * @throws \Spatie\DbDumper\Exceptions\CannotSetParameter
+   * @inheritDoc
    */
   public function setDumperConfig(DbDumper $db_dumper, DbDumperConfigInterface $config) {
     if ($config->getDbName()) {
@@ -109,6 +113,13 @@ class DbDumperAdapter {
     }
 
     return $db_dumper;
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function dumpToFile(string $file) {
+    $this->dumper->dumpToFile($file);
   }
 
 }

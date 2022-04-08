@@ -81,9 +81,9 @@ class DbDumperConfig implements DbDumperConfigInterface {
    * @param string|null $password
    * @param string|null $host
    * @param int|null $port
-   * @param array $include_tables
-   * @param array $exclude_tables
-   * @param array $extra_options
+   * @param array|null $include_tables
+   * @param array|null $exclude_tables
+   * @param array|null $extra_options
    * @param string|null $binary_path
    */
   public function __construct(
@@ -92,9 +92,9 @@ class DbDumperConfig implements DbDumperConfigInterface {
     string $password = NULL,
     string $host = NULL,
     int $port = NULL,
-    array $include_tables = [],
-    array $exclude_tables = [],
-    array $extra_options = [],
+    array $include_tables = NULL,
+    array $exclude_tables = NULL,
+    array $extra_options = NULL,
     string $binary_path = NULL
   ) {
     $this->dbName = $db_name;

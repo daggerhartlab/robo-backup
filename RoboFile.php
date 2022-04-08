@@ -1,6 +1,7 @@
 <?php
 
 use Aws\S3\S3Client;
+use DagLab\RoboBackups\DbDumperAdapter;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -22,6 +23,11 @@ class RoboFile extends \Robo\Tasks
    * @var \DagLab\RoboBackups\CliAdapterInterface
    */
   protected $cli;
+
+  /**
+   * @var \DagLab\RoboBackups\DbDumperAdapterInterface
+   */
+  protected $dumper;
 
   /**
    * Datestamp on the backups.
@@ -65,17 +71,39 @@ class RoboFile extends \Robo\Tasks
    */
   public function __construct() {
     if ($this->getConfigVal('cli')) {
-      $this->cli = new \DagLab\RoboBackups\CliAdapter(
-        $this->requireConfigVal('cli.executable'),
-        $this->requireConfigVal('cli.package'),
-        $this->requireConfigVal('cli.version'),
-        $this->requireConfigVal('cli.backup_db_command')
-      );
+      $this->cli = $this->getCli();
+    }
+    if ($this->getConfigVal('dump')) {
+      $this->dumper = $this->getDumper();
     }
     $this->date = date('Y-m-d');
 
     $this->backupFilesRoot = (array) $this->requireConfigVal('backups.files_root');
     $this->backupCodeRoot = (array) $this->requireConfigVal('backups.code_root');
+  }
+
+  /**
+   * @return \DagLab\RoboBackups\CliAdapterInterface
+   */
+  protected function getCli() {
+    return new \DagLab\RoboBackups\CliAdapter(
+      $this->requireConfigVal('cli.executable'),
+      $this->requireConfigVal('cli.package'),
+      $this->requireConfigVal('cli.version'),
+      $this->requireConfigVal('cli.backup_db_command')
+    );
+  }
+
+  /**
+   * @return \DagLab\RoboBackups\DbDumperAdapterInterface
+   */
+  protected function getDumper() {
+    $factory = new \DagLab\RoboBackups\DbDumperConfigFactory();
+    $config = $factory->createConfig($factory->resolveCredentials());
+    return new DbDumperAdapter(
+      $this->requireConfigVal('dump.type'),
+      $config
+    );
   }
 
   /**
@@ -91,15 +119,23 @@ class RoboFile extends \Robo\Tasks
    * @throws \Robo\Exception\TaskException
    */
   public function backupDatabase() {
-    $this->ensureCli();
-
     $filename = "{$this->requireConfigVal('backups.prefix')}-{$this->date}-db.sql";
     $file = "{$this->requireConfigVal('backups.destination')}/{$filename}";
 
     $this->ensureDir($this->requireConfigVal('backups.destination'));
-    $this->taskExecStack()
-      ->exec("{$this->cli->executable()} {$this->cli->backupDbCommand($this->requireConfigVal('backups.code_root'), $file)}")
-      ->run();
+
+    // Project specific cli utility for db dump.
+    if ($this->cli) {
+      $this->ensureCli();
+      $this->taskExecStack()
+        ->exec("{$this->cli->executable()} {$this->cli->backupDbCommand($this->requireConfigVal('backups.code_root'), $file)}")
+        ->run();
+    }
+    // Generic dump wrapper around technology cli command.
+    else if ($this->dumper) {
+      $this->dumper->dumpToFile($file);
+    }
+
     $this->taskPack("{$file}.zip")
       ->addFile($filename, $file)
       ->run();
