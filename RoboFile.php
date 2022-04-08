@@ -19,7 +19,7 @@ class RoboFile extends \Robo\Tasks
   /**
    * Configurable cli command.
    *
-   * @var \DagLab\RoboBackups\CliAdapter
+   * @var \DagLab\RoboBackups\CliAdapterInterface
    */
   protected $cli;
 
@@ -64,12 +64,14 @@ class RoboFile extends \Robo\Tasks
    * RoboFile constructor.
    */
   public function __construct() {
-    $this->cli = new \DagLab\RoboBackups\CliAdapter(
-      $this->requireConfigVal('cli.executable'),
-      $this->requireConfigVal('cli.package'),
-      $this->requireConfigVal('cli.version'),
-      $this->requireConfigVal('cli.backup_db_command')
-    );
+    if ($this->getConfigVal('cli')) {
+      $this->cli = new \DagLab\RoboBackups\CliAdapter(
+        $this->requireConfigVal('cli.executable'),
+        $this->requireConfigVal('cli.package'),
+        $this->requireConfigVal('cli.version'),
+        $this->requireConfigVal('cli.backup_db_command')
+      );
+    }
     $this->date = date('Y-m-d');
 
     $this->backupFilesRoot = (array) $this->requireConfigVal('backups.files_root');

@@ -17,6 +17,7 @@
         "symfony/var-dumper": "^5.4",
         "kerasai/robo-config": "^1.0",
         "pear/archive_tar": "^1.4",
-        "aws/aws-sdk-php": "^3.215"
+        "aws/aws-sdk-php": "^3.215",
+        "spatie/db-dumper": "^2.21"
     }
 }
