@@ -3,6 +3,16 @@ recipe: lamp
 config:
   webroot: web
 
+services:
+  pma:
+    type: phpmyadmin
+    hosts:
+      - database
+
+proxy:
+  pma:
+    - robo-backup-db.lndo.site
+
 tooling:
   which:
     service: appserver
