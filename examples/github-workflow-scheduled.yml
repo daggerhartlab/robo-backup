@@ -20,8 +20,8 @@ jobs:
 
       - name: Perform Backups
         env:
-          connection: u91-euynd8zqnemc@daggerhartlab.com
-          port: 18765
+          connection: username@domain.com
+          port: 22
           robo_app_root: ~/.robo/app
         run: |
           ssh $connection -p $port "cd $robo_app_root && ./vendor/bin/robo backup:database"

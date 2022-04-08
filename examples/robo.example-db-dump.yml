@@ -48,6 +48,7 @@ aws:
   secret: ''
   region: 'us-east-2'
   version: 'latest'
+  # Optional folder within S3 to store the backup file.
   folder: ''
 backups:
   prefix: 'website-name'
