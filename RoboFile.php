@@ -1,7 +1,10 @@
 <?php
 
 use Aws\S3\S3Client;
+use DagLab\RoboBackups\CliAdapter;
+use DagLab\RoboBackups\CliAdapterInterface;
 use DagLab\RoboBackups\DbDumperAdapter;
+use DagLab\RoboBackups\DbDumperConfigFactory;
 
 /**
  * This is project's console commands configuration for Robo task runner.
@@ -16,18 +19,6 @@ class RoboFile extends \Robo\Tasks
    * Version number.
    */
   const VERSION = '1.2.0';
-
-  /**
-   * Configurable cli command.
-   *
-   * @var \DagLab\RoboBackups\CliAdapterInterface
-   */
-  protected $cli;
-
-  /**
-   * @var \DagLab\RoboBackups\DbDumperAdapterInterface
-   */
-  protected $dumper;
 
   /**
    * Datestamp on the backups.
@@ -70,40 +61,9 @@ class RoboFile extends \Robo\Tasks
    * RoboFile constructor.
    */
   public function __construct() {
-    if ($this->getConfigVal('cli')) {
-      $this->cli = $this->getCli();
-    }
-    if ($this->getConfigVal('dump')) {
-      $this->dumper = $this->getDumper();
-    }
     $this->date = date('Y-m-d');
-
     $this->backupFilesRoot = (array) $this->requireConfigVal('backups.files_root');
     $this->backupCodeRoot = (array) $this->requireConfigVal('backups.code_root');
-  }
-
-  /**
-   * @return \DagLab\RoboBackups\CliAdapterInterface
-   */
-  protected function getCli() {
-    return new \DagLab\RoboBackups\CliAdapter(
-      $this->requireConfigVal('cli.executable'),
-      $this->requireConfigVal('cli.package'),
-      $this->requireConfigVal('cli.version'),
-      $this->requireConfigVal('cli.backup_db_command')
-    );
-  }
-
-  /**
-   * @return \DagLab\RoboBackups\DbDumperAdapterInterface
-   */
-  protected function getDumper() {
-    $factory = new \DagLab\RoboBackups\DbDumperConfigFactory();
-    $config = $factory->createConfig($factory->resolveCredentials());
-    return new DbDumperAdapter(
-      $this->requireConfigVal('dump.type'),
-      $config
-    );
   }
 
   /**
@@ -111,6 +71,36 @@ class RoboFile extends \Robo\Tasks
    */
   public function version() {
     $this->writeln(static::VERSION);
+  }
+
+  /**
+   * Validate configuration.
+   *
+   * @link https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
+   *
+   * @return void
+   * @throws \Robo\Exception\TaskException
+   */
+  public function configValidate() {
+    $this->stopOnFail(TRUE);
+
+    // Validate AWS credentials.
+    $client = $this->createS3Client();
+    $client->listObjectsV2([
+      'Bucket' => $this->requireConfigVal('aws.bucket'),
+    ]);
+    $this->say("S3 bucket '{$this->getConfigVal('aws.bucket')}' connected.");
+
+    // Validate CLI or Dumper.
+    if ($this->getConfigVal('cli')) {
+      $cli_adapter = $this->getCliAdapter();
+      $this->ensureCli($cli_adapter);
+      $this->say("CLI command '{$cli_adapter->executable()}}' found.");
+    }
+    elseif ($this->getConfigVal('dump')) {
+      $config = $this->getDumperConfig();
+      $this->say("Dumper config for database '{$config->getDbName()}' on host '{$config->getHost()}' loaded.");
+    }
   }
 
   /**
@@ -125,15 +115,17 @@ class RoboFile extends \Robo\Tasks
     $this->ensureDir($this->requireConfigVal('backups.destination'));
 
     // Project specific cli utility for db dump.
-    if ($this->cli) {
-      $this->ensureCli();
+    if ($this->getConfigVal('cli')) {
+      $cli_adapter = $this->getCliAdapter();
+      $this->ensureCli($cli_adapter);
       $this->taskExecStack()
-        ->exec("{$this->cli->executable()} {$this->cli->backupDbCommand($this->requireConfigVal('backups.code_root'), $file)}")
+        ->exec("{$cli_adapter->executable()} {$cli_adapter->backupDbCommand($this->requireConfigVal('backups.code_root'), $file)}")
         ->run();
     }
     // Generic dump wrapper around technology cli command.
-    else if ($this->dumper) {
-      $this->dumper->dumpToFile($file);
+    elseif ($this->getConfigVal('dump')) {
+      $dumper = $this->getDumper();
+      $dumper->dumpToFile($file);
     }
 
     $this->taskPack("{$file}.zip")
@@ -221,20 +213,57 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Get CLI adpater instance.
+   *
+   * @return \DagLab\RoboBackups\CliAdapterInterface
+   */
+  protected function getCliAdapter() {
+    return new CliAdapter(
+      $this->requireConfigVal('cli.executable'),
+      $this->requireConfigVal('cli.package'),
+      $this->requireConfigVal('cli.version'),
+      $this->requireConfigVal('cli.backup_db_command')
+    );
+  }
+
+  /**
+   * Get DbDumper adapter instance.
+   *
+   * @return \DagLab\RoboBackups\DbDumperAdapterInterface
+   */
+  protected function getDumper() {
+    $config = $this->getDumperConfig();
+    return new DbDumperAdapter(
+      $this->requireConfigVal('dump.type'),
+      $config
+    );
+  }
+
+  /**
+   * Get DbDumper config instance.
+   *
+   * @return \DagLab\RoboBackups\DbDumperConfigInterface
+   */
+  protected function getDumperConfig() {
+    $factory = new DbDumperConfigFactory();
+    return $factory->createConfig($factory->resolveCredentials());
+  }
+
+  /**
    * Install the cli if it doesn't exist.
    *
    * @throws \Robo\Exception\TaskException
    */
-  protected function ensureCli() {
+  protected function ensureCli(CliAdapterInterface $cli) {
     $result = $this->taskExecStack()
       ->stopOnFail(false)
-      ->exec("which {$this->cli->executable()}")
+      ->exec("which {$cli->executable()}")
       ->run();
 
     if ($result->getExitCode()) {
       $this->taskExecStack()
         ->stopOnFail(true)
-        ->exec("composer global require {$this->cli->package()}:{$this->cli->version()}")
+        ->exec("composer global require {$cli->package()}:{$cli->version()}")
         ->run();
     }
   }
@@ -246,7 +275,7 @@ class RoboFile extends \Robo\Tasks
    *
    * @throws \Robo\Exception\TaskException
    */
-  public function ensureAwsCli() {
+  protected function ensureAwsCli() {
     $result = $this->taskExecStack()
       ->stopOnFail(false)
       ->exec("which aws")

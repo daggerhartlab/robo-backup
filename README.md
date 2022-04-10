@@ -6,6 +6,7 @@ Utility for handling backups for a self-hosted website.
 
 - [ ] Document how to setup from start to finish
 - [ ] Maybe a "verify" step after upload. Checksum style
+- [ ] Backups retention policy
 
 ## Requirements
 
@@ -15,21 +16,23 @@ Utility for handling backups for a self-hosted website.
 
 ## Commands
 
-| Command | Description |
-|---|---|
-|`robo backup:database`| Backup website database according to robo.yml config. |
-|`robo backup:files`| Backup website non-code upload files. |
-|`robo backup:code`| Backup website code without upload files. |
-|`robo backup:files-sync`| Sync the files_root to S3 into a virtual folder named `files_sync`. |
+| Command                  | Description                                                         |
+|--------------------------|---------------------------------------------------------------------|
+| `robo config:validate`   | Simple robo.yml validation. Loads config & attempts S3 connection.  |
+| `robo backup:database`   | Backup website database according to robo.yml config.               |
+| `robo backup:files`      | Backup website non-code upload files.                               |
+| `robo backup:code`       | Backup website code without upload files.                           |
+| `robo backup:files-sync` | Sync the files_root to S3 into a virtual folder named `files_sync`. |
 
 
 ## Examples
 
-| File                                                                | Description                              |
-|---------------------------------------------------------------------|------------------------------------------|
-| [`robo.example-db-dump.yml`](examples/robo.example-db-dump.yml)     | Database dump using mysqldmp             |
-| [`robo.example-wordpress.yml`](examples/robo.example-wordpress.yml) | Database dump using WP CLI for WordPress |
-| [`robo.example-drupal.yml`](examples/robo.example-drupal.yml)       | Database dump using Drush for Drupal     |
+| File                                                                              | Description                              |
+|-----------------------------------------------------------------------------------|------------------------------------------|
+| [`robo.example-db-dump.yml`](examples/robo.example-db-dump.yml)                   | Database dump using mysqldump            |
+| [`robo.example-credentials-file.yml`](examples/robo.example-credentials-file.yml) | Database dump using credentials file     |
+| [`robo.example-wordpress.yml`](examples/robo.example-wordpress.yml)               | Database dump using WP CLI for WordPress |
+| [`robo.example-drupal.yml`](examples/robo.example-drupal.yml)                     | Database dump using Drush for Drupal     |
 
 ## Setup
 

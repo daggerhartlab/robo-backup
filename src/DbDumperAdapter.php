@@ -2,7 +2,6 @@
 
 namespace DagLab\RoboBackups;
 
-use Spatie\DbDumper\Databases;
 use Spatie\DbDumper\DbDumper;
 
 /**
