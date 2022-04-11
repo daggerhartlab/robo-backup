@@ -88,6 +88,7 @@ class RoboFile extends \Robo\Tasks
     $client = $this->createS3Client();
     $client->listObjectsV2([
       'Bucket' => $this->requireConfigVal('aws.bucket'),
+      'max-keys' => 1,
     ]);
     $this->say("S3 bucket '{$this->getConfigVal('aws.bucket')}' connected.");
 
@@ -318,6 +319,7 @@ class RoboFile extends \Robo\Tasks
   /**
    * Send file to S3.
    *
+   * @link https://docs.aws.amazon.com/aws-sdk-php/v2/api/class-Aws.S3.S3Client.html#_putObject
    * @link https://docs.aws.amazon.com/code-samples/latest/catalog/php-s3-PutObject.php.html
    *
    * @param string $source
