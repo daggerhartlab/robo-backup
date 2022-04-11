@@ -67,7 +67,7 @@ class CliAdapter implements CliAdapterInterface
    * @inheritDoc
    */
   public function restoreDbCommand(string $app_root, string $target_file) {
-    return strtr($this->backupDbCommand, [
+    return strtr($this->restoreDbCommand, [
       '[app_root]' => $app_root,
       '[target_file]' => $target_file,
     ]);
