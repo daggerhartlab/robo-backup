@@ -16,13 +16,15 @@ Utility for handling backups for a self-hosted website.
 
 ## Commands
 
-| Command                  | Description                                                         |
-|--------------------------|---------------------------------------------------------------------|
-| `robo config:validate`   | Simple robo.yml validation. Loads config & attempts S3 connection.  |
-| `robo backup:database`   | Backup website database according to robo.yml config.               |
-| `robo backup:files`      | Backup website non-code upload files.                               |
-| `robo backup:code`       | Backup website code without upload files.                           |
-| `robo backup:files-sync` | Sync the files_root to S3 into a virtual folder named `files_sync`. |
+| Command                   | Description                                                         |
+|---------------------------|---------------------------------------------------------------------|
+| `robo config:validate`    | Simple robo.yml validation. Loads config & attempts S3 connection.  |
+| `robo backup:database`    | Backup website database according to robo.yml config.               |
+| `robo restore:database`   | Restore latest website database according to robo.yml config.       |
+| `robo backup:files`       | Backup website non-code upload files.                               |
+| `robo backup:code`        | Backup website code without upload files.                           |
+| `robo backup:files-sync`  | Sync the files_root to S3 into a virtual folder named `files_sync`. |
+| `robo restore:files-sync` | Sync the files_root from S3 to the `backups.files_root`.            |
 
 
 ## Examples
