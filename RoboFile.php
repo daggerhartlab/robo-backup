@@ -217,6 +217,33 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Sync files from s3 to the file system.
+   *
+   * @return void
+   * @throws \Robo\Exception\TaskException
+   */
+  public function restoreFilesSync() {
+    $this->ensureAwsCli();
+    $folder = trim($this->getConfigVal('aws.folder') ?? '', '/');
+    $sync = $this->taskExecStack()
+      ->stopOnFail()
+      ->envVars([
+        'AWS_ACCESS_KEY_ID' => $this->requireConfigVal('aws.key'),
+        'AWS_SECRET_ACCESS_KEY' => $this->requireConfigVal('aws.secret'),
+        'AWS_DEFAULT_REGION' => $this->requireConfigVal('aws.region'),
+      ]);
+
+    foreach ($this->backupFilesRoot as $i => $files_root) {
+      $destination = basename($files_root) . "_sync_{$i}";
+      if ($folder) {
+        $destination = "{$folder}/{$destination}";
+      }
+      $sync->exec("aws s3 sync s3://{$this->requireConfigVal('aws.bucket')}/{$destination} {$files_root}");
+    }
+    $sync->run();
+  }
+
+  /**
    * Backup the code and send to S3.
    */
   public function backupCode() {
