@@ -165,6 +165,9 @@ class RoboFile extends \Robo\Tasks
       $this->taskExecStack()
         ->exec("{$cli_adapter->executable()} {$cli_adapter->restoreDbCommand($this->requireConfigVal('backups.code_root'), $file)}")
         ->run();
+
+      $this->removeFile($file);
+      $this->removeFile($archive);
     }
   }
 
