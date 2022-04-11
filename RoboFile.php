@@ -149,7 +149,7 @@ class RoboFile extends \Robo\Tasks
     $this->requireConfigVal('cli.restore_db_command');
 
     $archive = $this->downloadLatestFromS3('sql');
-    $destination = rtrim($this->requireConfigVal('backups.destination'), '/') . '/restore';
+    $destination = rtrim($this->requireConfigVal('backups.destination'), '/') . '/tmp';
     $file = $destination . '/' . basename($archive, '.zip');
 
     $this->taskExtract($archive)
@@ -167,6 +167,7 @@ class RoboFile extends \Robo\Tasks
         ->run();
 
       $this->removeFile($file);
+      $this->removeFile($destination);
       $this->removeFile($archive);
     }
   }
