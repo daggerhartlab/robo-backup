@@ -139,6 +139,36 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Restore latest database backup. **CLI only**
+   *
+   * @return void
+   * @throws \Robo\Exception\TaskException
+   */
+  public function restoreDatabase() {
+    // **CLI only** for now.
+    $this->requireConfigVal('cli.restore_db_command');
+
+    $archive = $this->downloadLatestFromS3('sql');
+    $destination = rtrim($this->requireConfigVal('backups.destination'), '/') . '/restore';
+    $file = $destination . '/' . basename($archive, '.zip');
+
+    $this->taskExtract($archive)
+      ->to($destination)
+      ->run();
+
+    if (!file_exists($file)) {
+      throw new \RuntimeException("Failed to extract {$file}");
+    }
+
+    if ($this->requireConfigVal('cli')) {
+      $cli_adapter = $this->getCliAdapter();
+      $this->taskExecStack()
+        ->exec("{$cli_adapter->executable()} {$cli_adapter->restoreDbCommand($this->requireConfigVal('backups.code_root'), $file)}")
+        ->run();
+    }
+  }
+
+  /**
    * Backup non-code site files and send to S3.
    */
   public function backupFiles() {
@@ -223,7 +253,8 @@ class RoboFile extends \Robo\Tasks
       $this->requireConfigVal('cli.executable'),
       $this->requireConfigVal('cli.package'),
       $this->requireConfigVal('cli.version'),
-      $this->requireConfigVal('cli.backup_db_command')
+      $this->requireConfigVal('cli.backup_db_command'),
+      $this->getConfigVal('cli.restore_db_command')
     );
   }
 
@@ -339,6 +370,56 @@ class RoboFile extends \Robo\Tasks
       'SourceFile' => $source,
       'Key' => $destination,
     ]);
+  }
+
+  /**
+   * Download the latest of a backup type from S3.
+   *
+   * @param string $backup_type
+   *   Backup type of: sql, files, or code.
+   *
+   * @return string
+   *   Resulting file name.
+   */
+  protected function downloadLatestFromS3(string $backup_type) {
+    if (!in_array($backup_type, ['sql', 'files', 'code'])) {
+      throw new \RuntimeException("Invalid backup type: {$backup_type}.");
+    }
+
+    $client = $this->createS3Client();
+    // Get list of backup file objects and sort by newest first.
+    $result = $client->listObjectsV2([
+      'Bucket' => $this->requireConfigVal('aws.bucket'),
+      'Prefix' => $this->requireConfigVal('backups.prefix'),
+    ]);
+    $results_array = $result->toArray();
+    if (empty($results_array['Contents'])) {
+      throw new \RuntimeException("No objects found in query.");
+    }
+
+    $objects = $results_array['Contents'];
+    $objects = array_filter($objects, function($object) use ($backup_type) {
+      return stripos(".{$object['Key']}.zip", $backup_type) !== FALSE;
+    });
+    usort($objects, function($a, $b) {
+      return $a['LastModified']->getTimestamp() <=> $b['LastModified']->getTimestamp();
+    });
+    $latest = array_shift($objects);
+    $this->say("Found latest {$backup_type} backup '{$latest['Key']}' from {$latest['LastModified']}");
+
+    $local_file = "{$this->requireConfigVal('backups.destination')}/" . basename($latest['Key']);
+    $client->getObject([
+      'Bucket' => $this->requireConfigVal('aws.bucket'),
+      'Key' => $latest['Key'],
+      'SaveAs' => $local_file,
+    ]);
+
+    if (!file_exists($local_file)) {
+      throw new \RuntimeException("Failed to download object {$latest['Key']} to {$local_file}.");
+    }
+
+    $this->say("Saved to {$local_file}");
+    return $local_file;
   }
 
   /**

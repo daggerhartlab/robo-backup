@@ -33,4 +33,14 @@ interface CliAdapterInterface
    */
   public function backupDbCommand(string $app_root, string $destination);
 
+  /**
+   * @param string $app_root
+   *   Location of the web app/website.
+   * @param string $target_file
+   *   Backup file.
+   *
+   * @return string
+   */
+  public function restoreDbCommand(string $app_root, string $target_file);
+
 }

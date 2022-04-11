@@ -7,6 +7,8 @@ cli:
   version: '*'
   # https://developer.wordpress.org/cli/commands/db/export/
   backup_db_command: 'db export [destination] --path=[app_root]'
+  # https://developer.wordpress.org/cli/commands/db/import/
+  restore_db_command: 'db import [target_file] --path=[app_root]'
 aws:
   bucket: ''
   key: ''
