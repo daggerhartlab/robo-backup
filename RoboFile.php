@@ -433,7 +433,7 @@ class RoboFile extends \Robo\Tasks
       return stripos(".{$object['Key']}.zip", $backup_type) !== FALSE;
     });
     usort($objects, function($a, $b) {
-      return $a['LastModified']->getTimestamp() <=> $b['LastModified']->getTimestamp();
+      return $b['LastModified']->getTimestamp() <=> $a['LastModified']->getTimestamp();
     });
     $latest = array_shift($objects);
     $this->say("Found latest {$backup_type} backup '{$latest['Key']}' from {$latest['LastModified']}");
