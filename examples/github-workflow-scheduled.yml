@@ -22,7 +22,7 @@ jobs:
         env:
           connection: username@domain.com
           port: 22
-          robo_app_root: ~/.robo/app
+          robo_app_root: /home/username/.robo/app
         run: |
           ssh $connection -p $port "cd $robo_app_root && ./vendor/bin/robo backup:database"
           ssh $connection -p $port "cd $robo_app_root && ./vendor/bin/robo backup:files"
