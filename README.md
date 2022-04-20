@@ -47,11 +47,15 @@ Utility for handling backups for a self-hosted website.
 ### S3 Setup
 
 1. Create a new S3 bucket named `backups-[WEBSITE]`.
-1. Create a new IAM user named `S3-backups-[WEBSITE]`. 
+    * Region: Whatever you choose, note it.
+    * ACLs disabled (recommended)
+    * Block all public access
+2. Create a new IAM user named `S3-backups-[WEBSITE]`. 
+    * Access key - Programmatic access (does not need Login/Console access)
     * Add to "S3-backups" group
-    * API access, does not need Login/Console access.
-1. Save the credentials to LastPass as part of the Note named "AWS S3 Client Backups Credentials"
-1. Attach a new Access Policy (see below) to the new IAM user.
+    * Download CSV of credentials and save them somewhere safe
+3. Create new Access Policy (see below) to the new IAM user
+    * Assign the policy to the new user (Permissions)
 
 #### Access Policy
 
