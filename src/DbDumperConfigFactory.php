@@ -23,37 +23,42 @@ class DbDumperConfigFactory
   /**
    * Resolve credentials based on configuration file strategy.
    *
+   * @param array $credentials
+   *   Dump configuration array.
+   *
    * @return array
    *   Resolved and parsed credentials.
    */
-  public function resolveCredentials() {
+  public function resolveCredentials(string $strategy, array $credentials = [], string $credentials_file = '') {
     $credential_values = [];
 
     // Credentials file strategy.
-    if ($this->requireConfigVal('dump.strategy') === 'file') {
-      if (!\file_exists($this->requireConfigVal('dump.credentials_file'))) {
-        throw new \RuntimeException("Credentials file missing: {$this->requireConfigVal('dump.credentials_file')}");
+    if ($strategy === 'file') {
+      if (!\file_exists($credentials_file)) {
+        throw new \RuntimeException("Credentials file missing: {$credentials_file}");
       }
 
-      $file_values = $this->parseCredentialsFile($this->requireConfigVal('dump.credentials_file'));
+      $file_values = $this->parseCredentialsFile($credentials_file);
       foreach ($this->credentialPropertyNames as $property) {
         // Default to literal value if the property.
-        $credential_values[$property] = $this->getConfigVal("dump.credentials.{$property}");
+        $credential_values[$property] = $credentials[$property] ?? NULL;
+
         // Look for property name as value key from file.
-        if (isset($file_values[$this->getConfigVal("dump.credentials.{$property}")])) {
-          $credential_values[$property] = $file_values[$this->getConfigVal("dump.credentials.{$property}")];
+        if (isset($file_values[$credentials[$property]])) {
+          $credential_values[$property] = $file_values[$credentials[$property]];
         }
       }
     }
 
     // Environment value strategy.
-    else if ($this->requireConfigVal('dump.strategy') === 'env') {
+    else if ($strategy === 'env') {
       foreach ($this->credentialPropertyNames as $property) {
         // Default to environment value.
-        $credential_values[$property] = getenv($this->getConfigVal("dump.credentials.{$property}"));
+        $credential_values[$property] = getenv($credentials[$property]);
+
         // Fallback to literal value if getenv results in false, meaning the environment variable doesn't exist.
         if ($credential_values[$property] === FALSE) {
-          $credential_values[$property] = $this->getConfigVal("dump.credentials.{$property}");
+          $credential_values[$property] = $credentials[$property];
         }
       }
     }
@@ -66,16 +71,16 @@ class DbDumperConfigFactory
    *
    * @return \DagLab\RoboBackups\DbDumperConfigInterface
    */
-  public function createConfig(array $credential_values) {
+  public function createConfig(array $credential_values, array $options = []) {
     return new DbDumperConfig(
       $credential_values['db_name'] ?? NULL,
       $credential_values['username'] ?? NULL,
       $credential_values['password'] ?? NULL,
       $credential_values['host'] ?? NULL,
       $credential_values['port'] ?? NULL,
-      $this->getConfigVal('dump.options.include_tables') ?? [],
-      $this->getConfigVal('dump.options.exclude_tables') ?? [],
-      $this->getConfigVal('dump.options.extra_options') ?? []
+      $options['include_tables'] ?? [],
+      $options['exclude_tables'] ?? [],
+      $options['extra_options'] ?? []
     );
   }
 

@@ -1,57 +1,55 @@
-#
-# Place this file in the root of this app, or ~/.robo/robo.yml.
-#
-dump:
-  # mysqldump, pg_dump, sqlite3, or mongodump
-  type: 'mysqldump'
-  # Where credentials are stored: 'env', or 'file'.
-  strategy: 'env'
-  # When the strategy is 'file' the "credentials_file" property must exist.
-  # This file is expected to be in format similar to .env or .ini files.
-  ## Example:
-  # DATABASE=my-database-name
-  # USERNAME=root
-  # PASSWORD=123456abcdef
-  credentials_file: '/home/some-user/credentials.txt'
-  ## Example:  credentials_file: '/home/some-user/some.ini'
-  ## Example:  credentials_file: '/home/some-user/.env'
+robo-backup:
+  dump:
+    # mysqldump, pg_dump, sqlite3, or mongodump
+    type: 'mysqldump'
+    # Where credentials are stored: 'env', or 'file'.
+    strategy: 'env'
+    # When the strategy is 'file' the "credentials_file" property must exist.
+    # This file is expected to be in format similar to .env or .ini files.
+    ## Example:
+    # DATABASE=my-database-name
+    # USERNAME=root
+    # PASSWORD=123456abcdef
+    credentials_file: '/home/some-user/credentials.txt'
+    ## Example:  credentials_file: '/home/some-user/some.ini'
+    ## Example:  credentials_file: '/home/some-user/.env'
 
-  # The "credentials" property must exist for any strategy.
-  # 'env'  - The credentials should be the names of the environment variables where the values are stored.
-  #          If the value is not found as an environment variable, then the value will be treated as the literal credential.
-  # 'file' - Like 'env', the credentials should be the names of the variables within the credential files.
-  #          If the value is not found in the file, then the value will be treated as the literal credential.
-  credentials:
-    db_name: 'lamp'
-    username: 'lamp'
-    password: 'lamp'
-    host: 'database'
-    port: 3306
-  options:
-    # When using include_tables, only these tables will be exported.
-    # Cannot use "include_tables" along with "exclude_tables".
-    include_tables:
-      - 'table_1'
-      - 'table_2'
-      - 'table_3'
-    # Cannot use "exclude_tables" along with "include_tables".
-    exclude_tables:
-      - 'table_4'
-      - 'table_5'
-      - 'table_6'
-    # Additional command line tool options.
-    extra_options:
-      - '--all--databases'
-aws:
-  bucket: ''
-  key: ''
-  secret: ''
-  region: 'us-east-2'
-  version: 'latest'
-  # Optional folder within S3 to store the backup file.
-  folder: ''
-backups:
-  prefix: 'website-name'
-  destination: '/home/some-user/.robo/backups'
-  files_root: '/home/some-user/public_html/wp-content/uploads'
-  code_root: '/home/some-user/public_html'
+    # The "credentials" property must exist for any strategy.
+    # 'env'  - The credentials should be the names of the environment variables where the values are stored.
+    #          If the value is not found as an environment variable, then the value will be treated as the literal credential.
+    # 'file' - Like 'env', the credentials should be the names of the variables within the credential files.
+    #          If the value is not found in the file, then the value will be treated as the literal credential.
+    credentials:
+      db_name: 'lamp'
+      username: 'lamp'
+      password: 'lamp'
+      host: 'database'
+      port: 3306
+    options:
+      # When using include_tables, only these tables will be exported.
+      # Cannot use "include_tables" along with "exclude_tables".
+      include_tables:
+        - 'table_1'
+        - 'table_2'
+        - 'table_3'
+      # Cannot use "exclude_tables" along with "include_tables".
+      exclude_tables:
+        - 'table_4'
+        - 'table_5'
+        - 'table_6'
+      # Additional command line tool options.
+      extra_options:
+        - '--all--databases'
+  aws:
+    bucket: ''
+    key: ''
+    secret: ''
+    region: 'us-east-2'
+    version: 'latest'
+    # Optional folder within S3 to store the backup file.
+    folder: ''
+  backups:
+    prefix: 'website-name'
+    destination: '/home/some-user/.robo/backups'
+    files_root: '/home/some-user/public_html/wp-content/uploads'
+    code_root: '/home/some-user/public_html'
