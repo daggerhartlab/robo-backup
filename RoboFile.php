@@ -312,10 +312,8 @@ class RoboFile extends \Robo\Tasks
 
     // Exclude files from code backup.
     foreach ($this->backupFilesRoot as $files_root) {
-      foreach ($this->backupCodeRoot as $code_root) {
-        $relative_files_root = str_replace($code_root, '', $files_root);
-        $this->archiveExclude[] = str_replace('/', '\/', trim($relative_files_root, '/'));
-      }
+      $relative_files_root = str_replace($this->backupCodeRoot, '', $files_root);
+      $this->archiveExclude[] = str_replace('/', '\/', trim($relative_files_root, '/'));
     }
     $archive = $this->taskPack($file);
     $archive->addDir("code", $this->backupCodeRoot);
