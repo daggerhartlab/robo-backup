@@ -478,10 +478,11 @@ class RoboFile extends \Robo\Tasks
     }
 
     $client = $this->createS3Client();
+    $prefix = $this->awsFolder ? $this->awsFolder . '/' . $this->backupPrefix : $this->backupPrefix;
     // Get list of backup file objects and sort by newest first.
     $result = $client->listObjectsV2([
       'Bucket' => $this->awsBucket,
-      'Prefix' => $this->backupPrefix,
+      'Prefix' => $prefix,
     ]);
     $results_array = $result->toArray();
     if (empty($results_array['Contents'])) {
