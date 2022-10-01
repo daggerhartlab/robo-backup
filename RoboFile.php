@@ -405,7 +405,7 @@ class RoboFile extends \Robo\Tasks
       ->run();
 
     if ($result->getExitCode()) {
-      $this->taskExecStack()
+      $aws2_result = $this->taskExecStack()
         ->stopOnFail(true)
         ->exec('curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"')
         ->exec('unzip awscliv2.zip')
@@ -413,6 +413,17 @@ class RoboFile extends \Robo\Tasks
         ->exec('rm -fr ./aws')
         ->exec("echo 'export PATH=\$PATH:\$HOME/.local/bin' >> .bashrc")
         ->run();
+
+      if ($aws2_result->getExitCode()) {
+        $aws1_result = $this->taskExecStack()
+          ->stopOnFail(true)
+          ->exec('curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"')
+          ->exec('unzip awscli-bundle.zip')
+          ->exec('./awscli-bundle/install -b ~/bin/aws')
+          ->exec('rm -fr ./awscli-bundle')
+          ->exec("echo 'export PATH=\$PATH:\$HOME/bin' >> .bashrc")
+          ->run();
+      }
     }
   }
 
