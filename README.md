@@ -8,7 +8,7 @@ Utility for handling backups for a self-hosted website.
    - Example: Install AWS CLI v1 w/ pythong 3.7 - [reference](https://docs.aws.amazon.com/cli/v1/userguide/install-linux.html#install-linux-bundled)
       ```
       curl "https://s3.amazonaws.com/aws-cli/awscli-bundle.zip" -o "awscli-bundle.zip"
-unzip awscli-bundle.zip
+      unzip awscli-bundle.zip
       python3.7 ./awscli-bundle/install -b ~/bin/aws
       ```
 - [ ] Document how to setup from start to finish
