@@ -97,4 +97,4 @@ Utility for handling backups for a self-hosted website.
 
 ### Github Actions Setup
 
-@todo 
+See the entry for the [`robo-scheduled-backups` workflow](https://github.com/daggerhartlab/devops/blob/main/github/workflows/robo-scheduled-backups.md) in our devops repo.
