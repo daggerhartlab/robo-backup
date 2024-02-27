@@ -61,6 +61,11 @@ class RoboFile extends \Robo\Tasks
    */
   protected $backupFilesRoot = [];
 
+    /**
+     * @var bool
+     */
+  protected $backupSuffixTimestamp = FALSE;
+
   /**
    * Code folder.
    *
@@ -99,6 +104,7 @@ class RoboFile extends \Robo\Tasks
     $this->backupPrefix = $this->requireConfigVal("{$this->name}.backups.prefix");
     $this->backupFilesRoot = (array) $this->requireConfigVal("{$this->name}.backups.files_root");
     $this->backupCodeRoot = $this->requireConfigVal("{$this->name}.backups.code_root");
+    $this->backupSuffixTimestamp = $this->getConfigVal("{$this->name}.backups.suffix_timestamp") ?: FALSE;
 
     if ($this->getConfigVal("{$this->name}.cli")) {
       $this->cliExecutable = $this->requireConfigVal("{$this->name}.cli.executable");
@@ -158,12 +164,24 @@ class RoboFile extends \Robo\Tasks
   }
 
   /**
+   * Get the suffix for the backup filename.
+   * @return string
+   */
+  private function getBackupSuffix() {
+    $suffix = $this->date;
+    if ($this->backupSuffixTimestamp) {
+      $suffix .= '--' . time();
+    }
+    return $suffix;
+  }
+
+  /**
    * Backup database and send to S3.
    *
    * @throws \Robo\Exception\TaskException
    */
   public function backupDatabase() {
-    $filename = "{$this->backupPrefix}-{$this->date}-db.sql";
+    $filename = "{$this->backupPrefix}-{$this->getBackupSuffix()}-db.sql";
     $file = "{$this->backupDestination}/{$filename}";
 
     $this->ensureDir($this->backupDestination);
@@ -231,7 +249,7 @@ class RoboFile extends \Robo\Tasks
    * Backup non-code site files and send to S3.
    */
   public function backupFiles() {
-    $filename = "{$this->backupPrefix}-{$this->date}-files.zip";
+    $filename = "{$this->backupPrefix}-{$this->getBackupSuffix()}-files.zip";
     $file = "{$this->backupDestination}/{$filename}";
     $this->ensureDir($this->backupDestination);
 
@@ -306,7 +324,7 @@ class RoboFile extends \Robo\Tasks
    * Backup the code and send to S3.
    */
   public function backupCode() {
-    $filename = "{$this->backupPrefix}-{$this->date}-code.zip";
+    $filename = "{$this->backupPrefix}-{$this->getBackupSuffix()}-code.zip";
     $file = "{$this->backupDestination}/{$filename}";
     $this->ensureDir($this->backupDestination);
 

@@ -20,3 +20,5 @@ robo-backup:
     destination: '/home/some-user/.robo/backups'
     files_root: '/home/some-user/public_html/sites/default/files'
     code_root: '/home/some-user/public_html'
+    # Optionally add timestamp to the backup filename. Defaults to false.
+    suffix_timestamp: true
